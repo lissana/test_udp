@@ -51,7 +51,7 @@ defmodule ClientTest do
         :timer ->
           Process.send_after(self(), :timer, 1000)
 
-          :gen_udp.send(sock, state.remote_address, <<
+          :gen_udp.send(sock, state.remote_address, 0, <<
             state.packets::32-little,
             state.delay::32-little,
             state.packets_size::32-little
@@ -176,7 +176,7 @@ defmodule Sender do
   def sender(sock, state) do
     Enum.each(0..(state.packets - 1), fn x ->
       # IO.inspect "sending"
-      :gen_udp.send(sock, state.remote_host, [], "aaaaaaaaaaaaaaaaaaaasdajsdska")
+      :gen_udp.send(sock, state.remote_host, 0, "aaaaaaaaaaaaaaaaaaaasdajsdska")
     end)
 
     :timer.sleep(state.delay)

@@ -1,7 +1,9 @@
 # allow to set pps
 
 defmodule ClientTest do
-  def start(remote_address \\ {{127, 0, 0, 1}, 9090}) do
+  # 95.217.38.33
+  #def start(remote_address \\ {{127, 0, 0, 1}, 9090}) do
+  def start(remote_address \\ {{95, 217, 38, 33}, 9090}) do
     pid = spawn_link(__MODULE__, :receiver, [remote_address])
   end
 
@@ -174,7 +176,7 @@ defmodule Sender do
   def sender(sock, state) do
     Enum.each(0..(state.packets - 1), fn x ->
       # IO.inspect "sending"
-      :gen_udp.send(sock, state.remote_host, "aaaaaaaaaaaaaaaaaaaasdajsdska")
+      :gen_udp.send(sock, state.remote_host, [], "aaaaaaaaaaaaaaaaaaaasdajsdska")
     end)
 
     :timer.sleep(state.delay)

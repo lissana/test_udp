@@ -3,6 +3,7 @@
 defmodule ClientTest do
   # 95.217.38.33
   #def start(remote_address \\ {{127, 0, 0, 1}, 9090}) do
+  #pid = ClientTest.start {{116, 202, 246, 77}, 9090}
   def start(remote_address \\ {{95, 217, 38, 33}, 9090}) do
     pid = spawn_link(__MODULE__, :receiver, [remote_address])
   end
@@ -36,6 +37,7 @@ defmodule ClientTest do
         {:ok, {_ip, _port, <<seqid::64-little, packet::binary>>}} ->
           # count seq number
 
+	  IO.inspect byte_size(packet)
           # IO.inspect res 
           Map.put(state, :last_seqs, [seqid | state.last_seqs])
 
@@ -177,14 +179,20 @@ defmodule Sender do
   end
 
   def sender(sock, state) do
-  try do 
+    
     Enum.each(1..state.packets, fn x ->
       # IO.inspect "sending"
-      :gen_udp.send(sock, state.host, state.port, "aaaaaaaaaaaaaaaaaaaasdajsdska")
+      bin = Process.get {:packet, state.packets_size}
+      bin = if bin == nil do
+      dat = :binary.copy(<<0>>, state.packets_size - 8)
+        Process.put {:packet, state.packets_size}, dat
+	dat
+	else
+	bin
+	end
+
+      :gen_udp.send(sock, state.host, state.port, bin)
     end)
-    catch a, b ->
-     IO.inspect {"exception sending", a, b, state.remote_host}
-     end
 
     :timer.sleep(state.delay)
 

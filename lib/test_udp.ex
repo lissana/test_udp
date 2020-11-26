@@ -159,13 +159,16 @@ defmodule Sender do
     {:ok, sock} =
       :gen_udp.open(0, [
         :binary,
-        {:active, true}
+        {:active, false}
       ])
 
     IO.inspect(:inet.port(sock))
 
+    {host, port} =remote_host 
     sender(sock, %{
       remote_host: remote_host,
+      host: host,
+      port: port,
       delay: delay,
       packets: packets,
       packets_size: 1024,
@@ -174,10 +177,14 @@ defmodule Sender do
   end
 
   def sender(sock, state) do
-    Enum.each(0..(state.packets - 1), fn x ->
+  try do 
+    Enum.each(1..state.packets, fn x ->
       # IO.inspect "sending"
-      :gen_udp.send(sock, state.remote_host, 0, "aaaaaaaaaaaaaaaaaaaasdajsdska")
+      :gen_udp.send(sock, state.host, state.port, "aaaaaaaaaaaaaaaaaaaasdajsdska")
     end)
+    catch a, b ->
+     IO.inspect {"exception sending", a, b, state.remote_host}
+     end
 
     :timer.sleep(state.delay)
 
@@ -187,7 +194,8 @@ defmodule Sender do
           %{
             state
             | delay: delay,
-              packets: packets
+              packets: packets,
+	      packets_size: packets_size
           }
       after
         0 ->
